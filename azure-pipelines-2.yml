@@ -1,35 +1,50 @@
 trigger:
-- main
+- master
+
 pool:
-  name: 'NavneetAgent'   # self-hosted agent
+  name: 'NavneetAgent'
+
 variables:
   buildConfiguration: 'Release'
+  dotnetVersion: '10.0.x'
+
 steps:
-# 1. Checkout code
-- checkout: self
-# 2. Restore dependencies
+
+# Install .NET 10 SDK
+- task: UseDotNet@2
+  displayName: 'Install .NET SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '$(dotnetVersion)'
+
+# Restore
 - task: DotNetCoreCLI@2
+  displayName: 'Restore'
   inputs:
     command: 'restore'
-    projects: '*/.csproj'
-# 3. Build the Web API project
+    projects: '**/*.csproj'
+
+# Build
 - task: DotNetCoreCLI@2
+  displayName: 'Build'
   inputs:
     command: 'build'
-    projects: '*/.csproj'
+    projects: '**/*.csproj'
     arguments: '--configuration $(buildConfiguration)'
-# 4. Run unit tests
+
+# Publish
 - task: DotNetCoreCLI@2
-  inputs:
-    command: 'test'
-    projects: '*/*Tests/.csproj'   # adjust if your test project has a different folder/name
-    arguments: '--configuration $(buildConfiguration) --no-build'
-# 5. Publish Web API project
-- task: DotNetCoreCLI@2
+  displayName: 'Publish'
   inputs:
     command: 'publish'
     publishWebProjects: true
-    arguments: '--configuration $(buildConfiguration) --output 
-
-$(Build.ArtifactStagingDirectory)'
+    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
     zipAfterPublish: true
+
+# Publish Artifact
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+
