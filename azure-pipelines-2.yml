@@ -53,7 +53,7 @@ steps:
 - task: AzureWebApp@1
   displayName: 'Deploy to Azure App Service'
   inputs:
-    azureSubscription: 'NavneetUpdatedConnection'
+    azureSubscription: 'NavneetUpdateConnection'
     appType: 'webApp'
     appName: 'NavneetWebApp'
     package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
